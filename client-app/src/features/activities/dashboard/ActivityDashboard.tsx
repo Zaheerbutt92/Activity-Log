@@ -1,46 +1,31 @@
-import React from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import { Grid } from "semantic-ui-react";
-import { Activity } from "../../../app/models/activity";
-import ActivityDetails from "../details/ActivityDetails";
-import ActivityForm from "../form/ActivityFrom";
+import LoadingComponent from "../../../app/layout/loadingComponent";
+import { useStore } from "../../../app/stores/store";
 import ActivityList from "./ActivityList";
 
-interface Props {
-  activities: Activity[];
-  selectedActivity: Activity | undefined;
-  selectActivity: (id:string) => void;
-  cancelSelectActivity: () => void;
-  editMode: boolean;
-  openForm: (id:string) => void;
-  closeForm: () =>void;
-  createOrEdit: (activity:Activity) => void;
-  deleteActivity: (id:string) => void;
-}
+function ActivityDashboard() {
+  const { activityStore } = useStore();
+  const { loadActivities, activityRegistry} = activityStore;
 
-export default function ActivityDashboard({ activities,selectedActivity,
-        selectActivity,cancelSelectActivity, editMode, openForm, closeForm, createOrEdit,deleteActivity }: Props) {
+  useEffect(() => {
+    if(activityRegistry.size <=1) loadActivities();
+  }, [activityRegistry.size,loadActivities]);
+
+  if (activityStore.loadingInitial)
+    return <LoadingComponent content="Loading app" />;
+
   return (
     <Grid>
-      <Grid.Column width='10'>
-        <ActivityList 
-            activities={activities} 
-            selectActivity={selectActivity}
-            deleteActivity={deleteActivity} />
+      <Grid.Column width="10">
+        <ActivityList />
       </Grid.Column>
-      <Grid.Column width='6'>
-        {selectedActivity && !editMode && 
-          <ActivityDetails 
-            activity={selectedActivity} 
-            cancelSelectActivity={cancelSelectActivity}
-            openForm={openForm} /> }
-
-        {editMode &&
-          <ActivityForm 
-            closeForm={closeForm}
-            activity={selectedActivity}
-            createOrEdit={createOrEdit}  />}
-
+      <Grid.Column width="6">
+        <h2>Activity filters</h2>
       </Grid.Column>
     </Grid>
   );
 }
+
+export default observer(ActivityDashboard);
