@@ -1,0 +1,29 @@
+version:  '3.8'
+
+services:
+  api:
+    container_name: activity-log-api
+    environment: 
+        - ASPNETCORE_URLS=http://+:5001
+        - DOTNET_USE_POLLING_FILE_WATCHER=1
+    build:
+      dockerfile: Dockerfile
+      context: ./API 
+    volumes: 
+      - ./API:/activity-log-server
+    ports: 
+      - 5001:5001
+  client:
+    container_name: activity-log-client
+    build: 
+      dockerfile: Dockerfile
+      context: ./client-app
+    volumes: 
+      - /activity-log-client-app/node_modules
+      - ./client-app:/activity-log-client-app
+    ports: 
+      - 3001:3001
+    environment: 
+      - CHOKIDAR_USEPOLLING=true
+    depends_on: 
+      - api
